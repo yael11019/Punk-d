@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app">
+    </div>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+    const LikeButtons = {
+  data() {
+    return {
+      counter: 0
+    };
+  },
+  methods: {
+    increment() {
+      this.counter++;
+    },
+    decrement() {
+      this.counter--;
+    }
+  },
+  template: `
+    <div>
+      <button @click="increment">Dar Like :)</button>
+      <button @click="decrement">Dar Dislike :(</button>
+      <button>{{ counter }} Likes</button>
+    </div>
+  `
+}
+        const app = Vue.createApp({
+            data() {
+                return {
+                    attr: "src",
+                    img: "Punk´d.jpeg",
+                    punkgif: "punkgif.gif",
+                    username: "",
+                    login: false,
+                    title: '',
+                    description: '',
+                    text: "Hola Vue",
+                    posts: [{
+                        title: "Banda de rock",
+                        description: "Buscamos financiar nuestro proyecto de música para grabar un disco.",
+                    },
+                    {
+                        title: "Libros para niños",
+                        description: "Soy un escritor y dibujante, busco crear libros para niños y necesito financiar mis proyectos",
+                    },
+                    {
+                        title: "Pinturas icónicas",
+                        description: "Necesito comprar material especial para mis pinturas",
+                    },
+                    {
+                        title: "Películas mexicanas",
+                        description: "Soy un escritor y tengo varias películas escritas, necesito dinero para lograr tener mis registros de autor",
+                    }]
+                };
+            },
+            methods: {
+                agregarPost() {
+                    if(this.title && this.description) {
+                        this.posts.unshift({title: this.title, description: this.description});
+                        this.title = '';
+                        this.description = '';
+                    }
+                },
+                eliminarPost(i) {
+                    this.posts.splice(i, 1);
+                },
+            },
+            watch: {
+                login(value) {
+                    if(value) {
+                    }
+                    else {
+                        this.username = "";
+                    }
+                }
+            },
+            template: `
+                <div class="container" :class="styles">
+                    
+                    <div class='index-container'>
+                        <img :[attr]="img" />
+                        <button class="index-button"> ¿Quiénes somos? </button>
+                        <button class="index-button"> ¿Cómo funciona? </button>
+                        <button class="index-button"> Proyectos </button>
+                        <button class="index-button"> Subir proyecto </button>
+                        <button class="index-button"> Blog </button>                    
+                        
+                        <div class="login">
+                            <div v-if="login" class="name">
+                                <p>Hola, {{ username }}</p>
+                            </div>
+                       
+                            <div v-else class="name">
+                                <div>Username</div>
+                                <input type="text" v-model="username" />
+                            </div>    
+                        
+                            <button @click="login = !login" class="login-button">
+                            <div v-if="!login">Acceder</div>
+                             <div v-else>Salir</div>
+                             </button>
+                        </div>
+                    
+                    </div>
+
+                    
+                    <div v-if="login" class="list">
+                        <div class="upload-project">
+                            <h2 class="h2">Sube nuevo proyecto</h2>
+                            
+                            <div class="title-post">
+                                <h4>Título del proyecto</h4>
+                                <input type="text" style="margin-left: 48px;" v-model="title" placeholder="Título"/>
+                            </div>
+
+                            <div class="description-post">
+                            <h4>Descripción del proyecto</h4>
+                                <textarea rows="4" cols="50" v-model="description" placeholder="Descripción"></textarea>
+                            </div>
+
+                            <div class="submit-post">
+                                <button @click="agregarPost">Sube proyecto</button>
+                            </div>
+                        </div>  
+                        
+                        <h2 class="h2-title">Posts</h2>
+                        <item 
+                        v-for="(item, i) in posts" 
+                        :key="i"
+                        :post="item"
+                        @eliminar="eliminarPost(i)"
+                        />
+                    </div>
+
+                    <div v-else class="greeting">
+                        <h1>Bienvenidos a Punk´d</h1>
+                        <h2>Para los rebeldes que luchan por sus sueños</h2>
+                        <img :[attr]="punkgif" />
+                    </div>
+
+                    <div>
+                        <v-footer>
+                            <template v-slot:footer>
+                                <button>Fin</button>
+                            </template>
+                            <template v-slot:content>
+                                <button>Más contenido</button>
+                            </template>
+                        </v-footer>
+                    </div>
+                    <div>
+                        <p>{{ text }}</p>
+                        <v-input v-model:value="text"/>
+                    </div>
+                </div>
+            `
+        });
+
+        app.component("item", {
+            props:["post"],
+            components: {LikeButtons},
+            methods: {
+                eliminar() {
+                    this.$emit('eliminar');
+                }
+            },
+            template: `<div class="item">
+                            <div class="title">{{ post.title }}</div>
+                            <p>{{ post.description }}</p>
+                            <LikeButtons />
+                            <button @click="eliminar">Eliminar proyecto</button>
+                        </div>`
+        });
+
+        app.component("v-input", {
+            props: {
+                value: String
+            },
+            methods: {
+                input(e){
+                    this.$emit("update:value", e.target.value);
+                }
+            },
+            template: `
+                <input type="text" :value="value" @input="input"/> 
+            `
+        });
+
+        app.component('v-footer',{
+    template: ` <footer>
+                    <slot name="footer"></slot>    
+                </footer>
+                <div>
+                    <slot name="content"></slot>    
+                </div>`
+    });
+
+        const vm = app.mount("#app");
+    </script>
+    <style>
+        html, body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #066699;
+        }
+        #app, .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
+        button {
+            margin-top: 24px;
+            border: 2px solid #066699;
+            background-color: white;
+            padding: 8px 24px;
+            border-radius: 12px;
+            margin-left: 20px;
+        }
+        .index-container {
+    position: fixed; /* Para que el contenedor se mantenga fijo */
+    top: 0; /* Para fijarlo en la parte superior de la página */
+    left: 0; /* Para fijarlo en la parte izquierda de la página */
+    background-color: #aedd2b; /* Cambia lightblue por el color que desees */
+    width: 100%; /* Para ocupar todo el ancho de la página */
+    display: flex; /* Para alinear el contenido horizontalmente */
+    justify-content: left; /* Para centrar el contenido horizontalmente */
+    align-items: center; /* Para centrar el contenido verticalmente */
+    height: 100px; /* Altura de ejemplo, puedes ajustarla según tus necesidades */
+    z-index: 1000; /* Para asegurarse de que esté por encima de otros elementos */
+}
+
+        .index-container img {
+        max-width: 100%; /* Para que la imagen no se salga del contenedor */
+        height: auto; /* Para mantener la proporción de la imagen */
+        margin-left: 20px;
+        width: 80px;
+    }
+    .index-button {
+        margin-top: 24px;
+        border: none;
+        background-color: white;
+        padding: 8px 24px;
+        border-radius: 12px;
+        margin-left: 20px;
+    }
+    .login-button {
+        margin-top: 24px;
+        border: none;
+        background-color: white;
+        padding: 8px 24px;
+        border-radius: 12px;
+        margin-right: 20px;
+    }
+    .name {
+        margin-top: 24px;
+        color: black;
+    }
+    .login {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        max-width: 1200px; /* Ajusta el ancho máximo según tus necesidades */
+        margin-left: auto;
+    }
+    .list{
+        display:flex;
+        flex-direction: column;
+        margin-top: 50px;
+    }
+    .item {
+        border: 5px solid #6c788e;
+        background-color: #fff;
+        padding: 8px 24px;
+        border-radius: 12px;
+        margin-left: 20px;
+        margin-top: 20px;
+        text-align: center;
+    }
+    .title {
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+    .greeting {
+        text-align: center;
+        color: #fff;
+        margin-top: 100px;
+    }
+    .punk-image {
+        width: 500px;
+    }
+    .h2 {
+        color: black;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    .h2-title {
+        color: #fff;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    .title-post {
+    display: flex; /* Para que los elementos se alineen en una fila */
+    align-items: center; /* Para alinear verticalmente los elementos */
+}
+
+.title-post h4 {
+    margin-right: 10px; /* Margen a la derecha del h4 */
+}
+.description-post {
+    display: flex;
+    align-items: center; /* Alinea verticalmente los elementos */
+    align-self: center;
+}
+
+.description-post h4 {
+    margin-right: 10px; /* Espacio entre el h4 y el input */
+    color: black;
+}
+.submit-post {
+            margin-top: 1px;
+            align-items: center;
+            align-self: center;
+        }
+.upload-project {
+    border: 5px solid #6c788e;
+        background-color: #fff;
+        padding: 8px 24px;
+        border-radius: 12px;
+        margin-left: 20px;
+        margin-top: 100px;
+        text-align: center;
+}
+    </style>
+</body>
+</html>
